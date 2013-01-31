@@ -122,27 +122,21 @@ public class SummaryTabPresenter extends WidgetPresenter<SummaryTabPresenter.Dis
       public void onResponseCode(Request request, Response response) {
 
         ClientErrorDto error = (ClientErrorDto) JsonUtils.unsafeEval(response.getText());
-        if(error.getExtension(JavaScriptErrorDto.ClientErrorDtoExtensions.errors) != null) {
-          JsArray<JavaScriptErrorDto> errors = (JsArray<JavaScriptErrorDto>) error
-              .getExtension(JavaScriptErrorDto.ClientErrorDtoExtensions.errors);
+        JsArray<JavaScriptErrorDto> errors = (JsArray<JavaScriptErrorDto>) error
+            .getExtension(JavaScriptErrorDto.ClientErrorDtoExtensions.errors);
+        String firstError = errors.get(0).getSourceName() +
+            ": " + //
+            errors.get(0).getMessage() + //
+            " (line " +//
+            errors.get(0).getLineNumber() +//
+            ", column " +//
+            errors.get(0).getColumnNumber() +//
+            ")";
 
-          NotificationEvent notificationEvent = NotificationEvent.Builder.newNotification().error("JavascriptError")
-              .args(errors.get(0).getSourceName(), //
-                  errors.get(0).getMessage(), //
-                  String.valueOf(errors.get(0).getLineNumber()),//
-                  String.valueOf(errors.get(0).getColumnNumber())).build();
-          eventBus.fireEvent(notificationEvent);
-        } else {
-          eventBus.fireEvent(
-              NotificationEvent.Builder.newNotification().error(error.getStatus()).args(error.getArgumentsArray())
-                  .build());
-        }
+        NotificationEvent notificationEvent = NotificationEvent.Builder.newNotification().error(firstError).build();
+        eventBus.fireEvent(notificationEvent);
       }
-    }
-
-    ).
-
-        send();
+    }).send();
   }
 
   private void cancelPendingSummaryRequest() {

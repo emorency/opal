@@ -42,8 +42,7 @@ public class ValuesTablePresenter extends PresenterWidget<ValuesTablePresenter.D
   private ValueSequencePopupPresenter valueSequencePopupPresenter;
 
   @Inject
-  public ValuesTablePresenter(Display display, final EventBus eventBus,
-      ValueSequencePopupPresenter valueSequencePopupPresenter) {
+  public ValuesTablePresenter(Display display, final EventBus eventBus, ValueSequencePopupPresenter valueSequencePopupPresenter) {
     super(eventBus, display);
     this.valueSequencePopupPresenter = valueSequencePopupPresenter;
   }
@@ -108,8 +107,7 @@ public class ValuesTablePresenter extends PresenterWidget<ValuesTablePresenter.D
     @Override
     public void onResource(Response response, JsArray<VariableDto> resource) {
       if(table.getLink().equals(ValuesTablePresenter.this.table.getLink())) {
-        JsArray<VariableDto> variables = resource != null ? resource : JsArray.createArray()
-            .<JsArray<VariableDto>>cast();
+        JsArray<VariableDto> variables = resource != null ? resource : JsArray.createArray().<JsArray<VariableDto>> cast();
         getView().setVariables(variables);
       }
     }
@@ -138,6 +136,16 @@ public class ValuesTablePresenter extends PresenterWidget<ValuesTablePresenter.D
 
   private class BadRequestCallback implements ResponseCodeCallback {
 
+    private String formatError(JavaScriptErrorDto error){
+      return error.getSourceName() +
+          ": " + //
+          error.getMessage() + //
+          " (line " +//
+          error.getLineNumber() +//
+          ", column " +//
+          error.getColumnNumber() +//
+          ")";
+    }
     @Override
     public void onResponseCode(Request request, Response response) {
       notifyError(response);
@@ -146,23 +154,11 @@ public class ValuesTablePresenter extends PresenterWidget<ValuesTablePresenter.D
     @SuppressWarnings("unchecked")
     protected void notifyError(Response response) {
       ClientErrorDto error = (ClientErrorDto) JsonUtils.unsafeEval(response.getText());
+      JsArray<JavaScriptErrorDto> errors = (JsArray<JavaScriptErrorDto>) error.getExtension(JavaScriptErrorDto.ClientErrorDtoExtensions.errors);
+      String firstError = formatError(errors.get(0));
 
-      if(error.getExtension(JavaScriptErrorDto.ClientErrorDtoExtensions.errors) != null) {
-        JsArray<JavaScriptErrorDto> errors = (JsArray<JavaScriptErrorDto>) error
-            .getExtension(JavaScriptErrorDto.ClientErrorDtoExtensions.errors);
-
-        NotificationEvent notificationEvent = NotificationEvent.Builder.newNotification().error("JavascriptError")
-            .args(errors.get(0).getSourceName(), //
-                errors.get(0).getMessage(), //
-                String.valueOf(errors.get(0).getLineNumber()),//
-                String.valueOf(errors.get(0).getColumnNumber())).build();
-
-        getEventBus().fireEvent(notificationEvent);
-      } else {
-        getEventBus().fireEvent(
-            NotificationEvent.Builder.newNotification().error(error.getStatus()).args(error.getArgumentsArray())
-                .build());
-      }
+      NotificationEvent notificationEvent = NotificationEvent.Builder.newNotification().error(firstError).build();
+      getEventBus().fireEvent(notificationEvent);
     }
   }
 
@@ -210,22 +206,19 @@ public class ValuesTablePresenter extends PresenterWidget<ValuesTablePresenter.D
         valuesRequest.cancel();
         valuesRequest = null;
       }
-
-      valuesRequest = ResourceRequestBuilderFactory.<ValueSetsDto>newBuilder().forResource(link).get()//
-          .withCallback(new ValueSetsResourceCallback(offset, table))
-          .withCallback(Response.SC_BAD_REQUEST, new BadRequestCallback()).send();
+      //noinspection MagicNumber
+      valuesRequest = ResourceRequestBuilderFactory.<ValueSetsDto> newBuilder().forResource(link).get()//
+      .withCallback(new ValueSetsResourceCallback(offset, table)).withCallback(400, new BadRequestCallback()).send();
     }
 
     private StringBuilder getLinkBuilder(int offset, int limit) {
-      return new StringBuilder(table.getLink()).append("/valueSets").append("?offset=").append(offset).append("&limit=")
-          .append(limit);
+      return new StringBuilder(table.getLink()).append("/valueSets").append("?offset=").append(offset).append("&limit=").append(limit);
     }
 
     @Override
     public void requestBinaryValue(VariableDto variable, String entityIdentifier) {
       StringBuilder link = new StringBuilder(table.getLink());
-      link.append("/valueSet/").append(entityIdentifier).append("/variable/").append(variable.getName())
-          .append("/value");
+      link.append("/valueSet/").append(entityIdentifier).append("/variable/").append(variable.getName()).append("/value");
       getEventBus().fireEvent(new FileDownloadEvent(link.toString()));
     }
 
@@ -246,14 +239,14 @@ public class ValuesTablePresenter extends PresenterWidget<ValuesTablePresenter.D
         variablesRequest = null;
       }
       //noinspection MagicNumber
-      variablesRequest = ResourceRequestBuilderFactory.<JsArray<VariableDto>>newBuilder().forResource(link).get()//
-          .withCallback(new VariablesResourceCallback(table)).withCallback(400, new BadRequestCallback() {
-            @Override
-            public void onResponseCode(Request request, Response response) {
-              notifyError(response);
-              setTable(table);
-            }
-          }).send();
+      variablesRequest = ResourceRequestBuilderFactory.<JsArray<VariableDto>> newBuilder().forResource(link).get()//
+      .withCallback(new VariablesResourceCallback(table)).withCallback(400, new BadRequestCallback() {
+        @Override
+        public void onResponseCode(Request request, Response response) {
+          notifyError(response);
+          setTable(table);
+        }
+      }).send();
     }
   }
 
