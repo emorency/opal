@@ -20,8 +20,6 @@ import org.obiba.opal.core.domain.security.Bookmark;
 import org.obiba.opal.core.service.SubjectProfileService;
 import org.obiba.opal.web.model.Opal;
 import org.obiba.opal.web.security.Dtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -60,4 +58,9 @@ public class BookmarksResourceImpl implements BookmarksResource {
     return Response.ok().build();
   }
 
+  @Override
+  public Response deleteBookmarks(List<String> resources) {
+    subjectProfileService.deleteBookmarks(principal, resources);
+    return Response.ok().build();
+  }
 }

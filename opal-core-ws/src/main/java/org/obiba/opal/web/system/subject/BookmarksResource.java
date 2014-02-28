@@ -12,6 +12,7 @@ package org.obiba.opal.web.system.subject;
 
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.QueryParam;
@@ -28,5 +29,8 @@ public interface BookmarksResource {
 
   @POST
   Response addBookmarks(@QueryParam("resource") List<String> resources);
+
+  @DELETE
+  Response deleteBookmarks(@QueryParam("resource") List<String> resources);
 
 }

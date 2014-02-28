@@ -19,6 +19,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.inject.Inject;
@@ -37,7 +38,11 @@ public class BookmarkListView extends ViewWithUiHandlers<BookmarkListUiHandlers>
 
   private final PlaceManager placeManager;
 
+  private final TranslationMessages translationMessages;
+
   private ColumnSortEvent.ListHandler<BookmarkDto> typeSortHandler;
+
+  private CheckboxColumn<BookmarkDto> checkColumn;
 
   interface Binder extends UiBinder<Widget, BookmarkListView> {}
 
@@ -45,7 +50,22 @@ public class BookmarkListView extends ViewWithUiHandlers<BookmarkListUiHandlers>
   OpalSimplePager pager;
 
   @UiField
-  CellTable<BookmarkDto> table;
+  Table<BookmarkDto> table;
+
+  @UiField
+  Alert selectAllAlert;
+
+  @UiField
+  Label selectAllStatus;
+
+  @UiField
+  IconAnchor selectAllAnchor;
+
+  @UiField
+  IconAnchor clearSelectionAnchor;
+
+  @UiField
+  IconAnchor removeBookmark;
 
   private final Translations translations;
 
@@ -56,9 +76,11 @@ public class BookmarkListView extends ViewWithUiHandlers<BookmarkListUiHandlers>
   private DeleteActionColumn deleteActionColumn;
 
   @Inject
-  public BookmarkListView(Binder uiBinder, Translations translations, PlaceManager placeManager) {
+  public BookmarkListView(Binder uiBinder, Translations translations, PlaceManager placeManager,
+      TranslationMessages translationMessages) {
     this.translations = translations;
     this.placeManager = placeManager;
+    this.translationMessages = translationMessages;
     initWidget(uiBinder.createAndBindUi(this));
     initTable();
   }
@@ -93,14 +115,22 @@ public class BookmarkListView extends ViewWithUiHandlers<BookmarkListUiHandlers>
         break;
       case VIEW_AND_DELETE:
         deleteActionColumn = new DeleteActionColumn();
+        deleteActionColumn.setActionHandler(new ActionHandler<BookmarkDto>() {
+          @Override
+          public void doAction(BookmarkDto bookmarkDto, String actionName) {
+            getUiHandlers().onDelete(Arrays.asList(bookmarkDto));
+          }
+        });
         table.addColumn(deleteActionColumn, translations.actionsLabel());
-        deleteActionColumn.setActionHandler(getUiHandlers().getActionHandler());
         break;
     }
   }
 
   private void initTable() {
+    checkColumn = new CheckboxColumn<BookmarkDto>(new BookmarkDtoDisplay());
+
     table.setVisibleRange(0, 10);
+    table.addColumn(checkColumn, checkColumn.getCheckColumnHeader());
     table.addColumn(new BookmarkColumn(placeManager), translations.resourceLabel());
     table.addColumn(new TypeColumn(translations), translations.typeLabel());
     table.addColumn(createColumn = new CreateColumn(), translations.createdLabel());
@@ -115,6 +145,11 @@ public class BookmarkListView extends ViewWithUiHandlers<BookmarkListUiHandlers>
     table.getColumnSortList().push(table.getColumn(SORTABLE_COLUMN_CREATED));
     table.getColumnSortList().push(table.getColumn(SORTABLE_COLUMN_RESOURCE));
     table.addColumnSortHandler(typeSortHandler);
+  }
+
+  @UiHandler("removeBookmark")
+  public void onRemove(ClickEvent event) {
+    getUiHandlers().onDelete(checkColumn.getSelectedItems());
   }
 
   private static class BookmarkColumn extends Column<BookmarkDto, BookmarkDto> {
@@ -205,6 +240,49 @@ public class BookmarkListView extends ViewWithUiHandlers<BookmarkListUiHandlers>
           return allActions();
         }
       });
+    }
+  }
+
+  private class BookmarkDtoDisplay implements CheckboxColumn.Display<BookmarkDto> {
+
+    @Override
+    public Table<BookmarkDto> getTable() {
+      return table;
+    }
+
+    @Override
+    public Object getItemKey(BookmarkDto item) {
+      return item.getResource();
+    }
+
+    @Override
+    public IconAnchor getClearSelection() {
+      return clearSelectionAnchor;
+    }
+
+    @Override
+    public IconAnchor getSelectAll() {
+      return selectAllAnchor;
+    }
+
+    @Override
+    public HasText getSelectAllStatus() {
+      return selectAllStatus;
+    }
+
+    @Override
+    public ListDataProvider<BookmarkDto> getDataProvider() {
+      return dataProvider;
+    }
+
+    @Override
+    public String getNItemLabel(int nb) {
+      return translationMessages.nBookmarksLabel(nb).toLowerCase();
+    }
+
+    @Override
+    public Alert getAlert() {
+      return selectAllAlert;
     }
   }
 }

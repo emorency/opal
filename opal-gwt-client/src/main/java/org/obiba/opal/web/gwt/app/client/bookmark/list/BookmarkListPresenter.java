@@ -1,5 +1,6 @@
 package org.obiba.opal.web.gwt.app.client.bookmark.list;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.obiba.opal.web.gwt.app.client.js.JsArrays;
@@ -61,9 +62,32 @@ public class BookmarkListPresenter extends PresenterWidget<BookmarkListPresenter
     refreshTable();
   }
 
+  @Override
+  public void onDelete(List<BookmarkDto> bookmarkDtos) {
+    deleteBookmarks(bookmarkDtos);
+  }
+
   private void deleteBookmark(BookmarkDto bookmarkDto) {
     ResourceRequestBuilderFactory.newBuilder() //
         .forResource(UriBuilders.BOOKMARK.create().build(bookmarkDto.getResource())) //
+        .withCallback(Response.SC_OK, new ResponseCodeCallback() {
+          @Override
+          public void onResponseCode(Request request, Response response) {
+            refreshTable();
+          }
+        }) //
+        .delete().send();
+  }
+
+  private void deleteBookmarks(List<BookmarkDto> bookmarkDtos) {
+    List<String> paths = new ArrayList<>();
+    for(BookmarkDto bookmarkDto : bookmarkDtos) {
+      paths.add(bookmarkDto.getResource());
+    }
+
+    ResourceRequestBuilderFactory.newBuilder() //
+        .forResource(UriBuilders.BOOKMARKS.create().build()) //
+        .withBody("appli", paths)//
         .withCallback(Response.SC_OK, new ResponseCodeCallback() {
           @Override
           public void onResponseCode(Request request, Response response) {

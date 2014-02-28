@@ -143,18 +143,18 @@ public class KeyCommand extends AbstractOpalRuntimeDependentCommand<KeyCommandOp
       Project project = projectService.getProject(options.getUnit());
       if(projectsKeyStoreService.aliasExists(project, alias)) {
         projectsKeyStoreService.deleteKeyStore(project, alias);
-        getShell().printf("Deleted key with alias '%s' from keystore '%s'.\n", alias, project.getName());
+        getShell().printf("Removed key with alias '%s' from keystore '%s'.\n", alias, project.getName());
       } else {
         getShell()
-            .printf("The alias '%s' does not exist in keystore '%s'. No key deleted.\n", alias, project.getName());
+            .printf("The alias '%s' does not exist in keystore '%s'. No key removed.\n", alias, project.getName());
         errorCode = 1;
       }
     } else {
       if(systemKeyStoreService.aliasExists(alias)) {
         systemKeyStoreService.deleteKeyStore(alias);
-        getShell().printf("Deleted key with alias '%s' from system keystore.\n", alias);
+        getShell().printf("Removed key with alias '%s' from system keystore.\n", alias);
       } else {
-        getShell().printf("The alias '%s' does not exist in system keystore. No key deleted.\n", alias);
+        getShell().printf("The alias '%s' does not exist in system keystore. No key removed.\n", alias);
         errorCode = 1;
       }
     }

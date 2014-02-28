@@ -141,9 +141,18 @@ public class SubjectProfileServiceImpl implements SubjectProfileService {
     }
   }
 
+  @Override
+  public void deleteBookmarks(String principal, List<String> paths) throws SubjectProfileNotFoundException {
+    SubjectProfile profile = getProfile(principal);
+    for(String path : paths) {
+      profile.removeBookmark(path);
+    }
+    orientDbService.save(profile, profile);
+  }
+
   private void ensureUserHomeExists(String username) {
     try {
-      if (!opalRuntime.hasFileSystem()) return;
+      if(!opalRuntime.hasFileSystem()) return;
       FileObject home = opalRuntime.getFileSystem().getRoot().resolveFile("/home/" + username);
       if(!home.exists()) {
         log.info("Creating user home: /home/{}", username);

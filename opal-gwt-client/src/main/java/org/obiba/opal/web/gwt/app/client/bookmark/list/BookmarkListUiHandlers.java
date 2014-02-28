@@ -10,12 +10,13 @@
 
 package org.obiba.opal.web.gwt.app.client.bookmark.list;
 
-import org.obiba.opal.web.gwt.app.client.ui.celltable.ActionHandler;
+import java.util.List;
+
 import org.obiba.opal.web.model.client.opal.BookmarkDto;
 
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface BookmarkListUiHandlers extends UiHandlers {
 
-  ActionHandler<BookmarkDto> getActionHandler();
+  void onDelete(List<BookmarkDto> bookmarkDtos);
 }

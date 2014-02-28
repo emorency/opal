@@ -90,6 +90,15 @@ public class SubjectProfileCurrentResource {
     return resource.addBookmarks(decodeResources(resources));
   }
 
+  @Path("/bookmarks")
+  @DELETE
+  @NoAuthorization
+  public Response deleteBookmarks(@QueryParam("resource") List<String> resources) throws UnsupportedEncodingException {
+    BookmarksResource resource = applicationContext.getBean(BookmarksResource.class);
+    resource.setPrincipal(getPrincipal());
+    return resource.deleteBookmarks(decodeResources(resources));
+  }
+
   @Path("/bookmark/{path:.*}")
   @DELETE
   @NoAuthorization
@@ -101,14 +110,14 @@ public class SubjectProfileCurrentResource {
   }
 
   private String getPrincipal() {
-    return (String)SecurityUtils.getSubject().getPrincipal();
+    return (String) SecurityUtils.getSubject().getPrincipal();
   }
 
   private List<String> decodeResources(Iterable<String> resourceIterator) throws UnsupportedEncodingException {
     OpalGeneralConfig config = opalGeneralConfigService.getConfig();
 
     List<String> decodedResources = new ArrayList<>();
-    for (String resource : resourceIterator) {
+    for(String resource : resourceIterator) {
       decodedResources.add(URLDecoder.decode(resource, config.getDefaultCharacterSet()));
     }
 

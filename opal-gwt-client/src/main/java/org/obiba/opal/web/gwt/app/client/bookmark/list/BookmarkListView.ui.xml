@@ -10,13 +10,33 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:o="urn:import:org.obiba.opal.web.gwt.app.client.ui"
     xmlns:b="urn:import:com.github.gwtbootstrap.client.ui"
+    xmlns:b2="urn:import:com.github.gwtbootstrap.client.ui.base"
     ui:generateFormat='com.google.gwt.i18n.rebind.format.PropertiesFormat'
     ui:generateKeys="com.google.gwt.i18n.server.keygen.MD5KeyGenerator"
     ui:generateLocales="default">
 
   <g:FlowPanel>
-    <o:OpalSimplePager ui:field="pager" location="RIGHT" addStyleNames="pull-right"/>
-    <o:Table ui:field="table" addStyleNames="small-top-margin pull-left"/>
+    <g:FlowPanel addStyleNames="clearfix">
+      <o:OpalSimplePager ui:field="pager" location="RIGHT" addStyleNames="pull-right"/>
+    </g:FlowPanel>
+
+    <g:FlowPanel>
+      <b:Alert ui:field="selectAllAlert" close="false" visible="false" addStyleNames="select">
+
+        <b2:IconAnchor icon="TRASH" ui:field="removeBookmark" addStyleNames="inline small-indent">
+          <ui:msg description="Remove label">Remove</ui:msg>
+        </b2:IconAnchor>
+
+        <g:FlowPanel addStyleNames="pull-right">
+          <g:Label ui:field="selectAllStatus" addStyleNames="inline"/>
+          <b2:IconAnchor ui:field="selectAllAnchor" icon="CHECK" addStyleNames="inline small-indent"/>
+          <b2:IconAnchor ui:field="clearSelectionAnchor" icon="REMOVE" addStyleNames="inline small-indent">
+            <ui:msg description="Clear label">Clear</ui:msg>
+          </b2:IconAnchor>
+        </g:FlowPanel>
+      </b:Alert>
+      <o:Table ui:field="table" addStyleNames="small-top-margin pull-left"/>
+    </g:FlowPanel>
   </g:FlowPanel>
 
 </ui:UiBinder>

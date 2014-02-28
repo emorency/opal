@@ -73,4 +73,6 @@ public interface SubjectProfileService extends SystemService {
   void addBookmarks(String principal, List<String> resources) throws SubjectProfileNotFoundException;
 
   void deleteBookmark(String principal, String path) throws SubjectProfileNotFoundException;
+
+  void deleteBookmarks(String principal, List<String> path) throws SubjectProfileNotFoundException;
 }
