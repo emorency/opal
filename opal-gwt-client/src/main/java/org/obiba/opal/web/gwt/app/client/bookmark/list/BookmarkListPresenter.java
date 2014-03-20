@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.obiba.opal.web.gwt.app.client.js.JsArrays;
-import org.obiba.opal.web.gwt.app.client.ui.celltable.ActionHandler;
-import org.obiba.opal.web.gwt.app.client.ui.celltable.ActionsColumn;
 import org.obiba.opal.web.gwt.app.client.ui.celltable.HasActionHandler;
 import org.obiba.opal.web.gwt.rest.client.ResourceCallback;
 import org.obiba.opal.web.gwt.rest.client.ResourceRequestBuilderFactory;
@@ -45,18 +43,6 @@ public class BookmarkListPresenter extends PresenterWidget<BookmarkListPresenter
   }
 
   @Override
-  public ActionHandler<BookmarkDto> getActionHandler() {
-    return new ActionHandler<BookmarkDto>() {
-      @Override
-      public void doAction(BookmarkDto bookmarkDto, String actionName) {
-        if(ActionsColumn.REMOVE_ACTION.equals(actionName)) {
-          deleteBookmark(bookmarkDto);
-        }
-      }
-    };
-  }
-
-  @Override
   protected void onReveal() {
     super.onReveal();
     refreshTable();
@@ -87,7 +73,7 @@ public class BookmarkListPresenter extends PresenterWidget<BookmarkListPresenter
 
     ResourceRequestBuilderFactory.newBuilder() //
         .forResource(UriBuilders.BOOKMARKS.create().build()) //
-        .withBody("appli", paths)//
+//        .withBody("appli", paths)//
         .withCallback(Response.SC_OK, new ResponseCodeCallback() {
           @Override
           public void onResponseCode(Request request, Response response) {
